@@ -3,8 +3,8 @@
 
 using namespace std;
 
-constexpr int TAM_FILA = 4;         // Filas
-constexpr int TAM_COLUMNA = 3;      // Columnas
+constexpr int TAM_FILA = 10000;         // Filas
+constexpr int TAM_COLUMNA = 10000;      // Columnas
 constexpr int RANK_MASTER = 0;      // Rango del proceso maestro
 constexpr int NUM_DIMENSIONES = 2;  // Número de dimensiones de la topología cartesiana
 constexpr int DATOS = 1;            // Número de datos a enviar
