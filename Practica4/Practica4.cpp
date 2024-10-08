@@ -3,11 +3,11 @@
 
 using namespace std;
 
-constexpr int TAM_FILA = 10000;         // Filas
-constexpr int TAM_COLUMNA = 10000;      // Columnas
+constexpr int TAM_FILA = 4;         // Filas
+constexpr int TAM_COLUMNA = 3;      // Columnas
 constexpr int RANK_MASTER = 0;      // Rango del proceso maestro
 constexpr int NUM_DIMENSIONES = 2;  // Número de dimensiones de la topología cartesiana
-constexpr int DATOS = 1;            // Número de datos a enviar
+constexpr int NUM_DATOS = 1;        // Número de datos a enviar
 
 /*
     Función que se necarga de generar una matriz de tamaño N x N con valores aleatorios.
@@ -47,11 +47,12 @@ int main(int argc, char* argv[]) {
 
     // Crear la topología cartesiana
     int dims[2] = { TAM_FILA, TAM_COLUMNA };
-    int periods[2] = { 0, 0 }; // No periódica
-    int reorder = 1;
+    int periods[2] = { 0, 0 };  // No periódica
+	int reorder = 1;            // Permitir al comunicador reordenar los procesos
     MPI_Comm cart_comm;
     MPI_Cart_create(MPI_COMM_WORLD, NUM_DIMENSIONES, dims, periods, reorder, &cart_comm);
 
+	// Obtener las coordenadas del proceso
     int coords[2];
     MPI_Cart_coords(cart_comm, rank, NUM_DIMENSIONES, coords);
 
@@ -72,8 +73,8 @@ int main(int argc, char* argv[]) {
     double startTime = MPI_Wtime();
 
     // Distribuir las matrices A y B a todos los procesos
-    MPI_Bcast(A, TAM_FILA * TAM_COLUMNA, MPI_INT, RANK_MASTER, MPI_COMM_WORLD);
-    MPI_Bcast(B, TAM_FILA * TAM_COLUMNA, MPI_INT, RANK_MASTER, MPI_COMM_WORLD);
+    MPI_Bcast(A, TAM_FILA * TAM_COLUMNA, MPI_INT, RANK_MASTER, cart_comm);
+    MPI_Bcast(B, TAM_FILA * TAM_COLUMNA, MPI_INT, RANK_MASTER, cart_comm);
 
     // Cada proceso suma su elemento correspondiente
     int row = coords[0];
@@ -81,7 +82,7 @@ int main(int argc, char* argv[]) {
     C[row][col] = A[row][col] + B[row][col];
 
     // Recolectar resultados en la matriz C en el proceso maestro
-    MPI_Gather(&C[row][col], DATOS, MPI_INT, C, DATOS, MPI_INT, RANK_MASTER, MPI_COMM_WORLD);
+    MPI_Gather(&C[row][col], NUM_DATOS, MPI_INT, C, NUM_DATOS, MPI_INT, RANK_MASTER, cart_comm);
 
     if (rank == RANK_MASTER) {
         // Medir el tiempo de finalización
@@ -105,7 +106,7 @@ void generateMatrix(int matrix[TAM_FILA][TAM_COLUMNA]) {
 
 void printLine() {
     printf("+");
-    for (int j = 0; j < TAM_COLUMNA-1; ++j) {
+    for (int j = 0; j < TAM_COLUMNA - 1; ++j) {
         printf("-----");
     }
     printf("----+\n");
