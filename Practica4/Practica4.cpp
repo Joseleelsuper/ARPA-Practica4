@@ -48,11 +48,11 @@ int main(int argc, char* argv[]) {
     // Crear la topología cartesiana
     int dims[2] = { TAM_FILA, TAM_COLUMNA };
     int periods[2] = { 0, 0 };  // No periódica
-	int reorder = 1;            // Permitir al comunicador reordenar los procesos
+    int reorder = 1;            // Permitir al comunicador reordenar los procesos
     MPI_Comm cart_comm;
     MPI_Cart_create(MPI_COMM_WORLD, NUM_DIMENSIONES, dims, periods, reorder, &cart_comm);
 
-	// Obtener las coordenadas del proceso
+    // Obtener las coordenadas del proceso
     int coords[2];
     MPI_Cart_coords(cart_comm, rank, NUM_DIMENSIONES, coords);
 
